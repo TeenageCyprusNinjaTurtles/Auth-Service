@@ -30,4 +30,4 @@ jobs:
 
     - name: Push Docker Image
       run: |
-        docker push  ghcr.io/teenagecyprusninjaturtles/auth-service::${{ github.ref_name }}
+        docker push  ghcr.io/teenagecyprusninjaturtles/auth-service:${{ github.ref_name }}
