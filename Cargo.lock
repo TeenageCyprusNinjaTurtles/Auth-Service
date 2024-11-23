@@ -6,6 +6,7 @@ version = 3
 name = "Auth-Service"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "console_log",
  "log",
  "r2d2",

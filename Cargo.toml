@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+base64 = "0.22.1"
 console_log = "1.0.0"
 log = "0.4.22"
 r2d2 = "0.8.10"
