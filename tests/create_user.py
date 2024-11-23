@@ -137,9 +137,10 @@ def test_user_auth():
     assert response.status_code == 200
     
     response = response.json()
-    assert len(response.keys()) == 2
+    assert len(response.keys()) == 3
     assert response['level'] == user.level
     assert len(response['token']) == 32
+    assert response['email'] == user.email
 
     response = requests.post('http://localhost:5000/user/auth', json={"email": user.email, "password": faker_instance.password()})
     assert response.status_code == 200

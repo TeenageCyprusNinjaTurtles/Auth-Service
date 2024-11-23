@@ -3,7 +3,7 @@ use r2d2_postgres::{postgres, PostgresConnectionManager};
 use rouille::{Request, Response};
 use serde::{Deserialize, Serialize};
 
-use crate::lib;
+use crate::{library};
 
 #[derive(Serialize, Deserialize)]
 struct UserObject {
@@ -46,6 +46,7 @@ struct UserAuthRequest {
 struct UserAuthResponse {
     token: String,
     level: i32,
+    email: String,
 }
 
 pub(crate) fn on_user_create(
@@ -174,6 +175,7 @@ pub(crate) fn on_user_auth(
                 return Response::json(&UserAuthResponse {
                     token,
                     level: row.get(0),
+                    email: user_auth.email,
                 });
             } else {
                 return Response::json(&CreateUserResponse {
