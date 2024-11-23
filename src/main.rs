@@ -5,7 +5,7 @@ use log::{info, error};
 
 mod user_manager;
 mod user_controller;
-mod lib;
+mod library;
 
 fn main() {
     simple_logger::SimpleLogger::new().init().unwrap();

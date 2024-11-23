@@ -52,7 +52,7 @@ pub(crate) fn on_user_create(
     request: &Request,
     connection_pool: r2d2::Pool<PostgresConnectionManager<postgres::NoTls>>,
 ) -> Response {
-    let data = lib::utils::request_to_bytes(&request);
+    let data = library::utils::request_to_bytes(&request);
     let user_object: CreateUser;
     match serde_json::from_slice(&data) {
         Ok(user_data) => {
@@ -60,28 +60,28 @@ pub(crate) fn on_user_create(
         }
         Err(_) => {
             return Response::json(&CreateUserResponse {
-                result: lib::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
+                result: library::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
             });
         }
     };
-    let level = lib::utils::get_user_level(&request);
+    let level = library::utils::get_user_level(&request);
     if user_object.user.level > 1 && level != 3 {
         return Response::json(&CreateUserResponse {
-            result: lib::enums::ERROR_RESPONSE_ACCESS_ERROR.to_string(),
+            result: library::enums::ERROR_RESPONSE_ACCESS_ERROR.to_string(),
         });
     }
 
     let mut conn = connection_pool.get().unwrap();
     match  conn.execute(
         "INSERT INTO platform_users (name, password, email, organization, phone, location, level, version) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)",
-        &[&user_object.user.name, &user_object.password, &user_object.user.email, &user_object.user.organization, &user_object.user.phone, &user_object.user.location, &user_object.user.level, &lib::enums::VERSION]
+        &[&user_object.user.name, &user_object.password, &user_object.user.email, &user_object.user.organization, &user_object.user.phone, &user_object.user.location, &user_object.user.level, &library::enums::VERSION]
     ) {
         Ok(_) => {
-            Response::json(&CreateUserResponse{result: lib::enums::ERROR_RESPONSE_OK.to_string()})
+            Response::json(&CreateUserResponse{result: library::enums::ERROR_RESPONSE_OK.to_string()})
         },
         Err(err) => {
             log::error!("Error creating user: {}", err);
-            Response::json(&CreateUserResponse{result: lib::enums::ERROR_RESPONSE_ALREADY_EXISTS.to_string()})
+            Response::json(&CreateUserResponse{result: library::enums::ERROR_RESPONSE_ALREADY_EXISTS.to_string()})
         }
     }
 }
@@ -90,18 +90,18 @@ pub(crate) fn on_user_get(
     request: &Request,
     connection_pool: r2d2::Pool<PostgresConnectionManager<postgres::NoTls>>,
 ) -> Response {
-    let level = lib::utils::get_user_level(&request);
+    let level = library::utils::get_user_level(&request);
     if level == 0 {
         return Response::json(&CreateUserResponse {
-            result: lib::enums::ERROR_RESPONSE_ACCESS_ERROR.to_string(),
+            result: library::enums::ERROR_RESPONSE_ACCESS_ERROR.to_string(),
         });
     }
-    let data = lib::utils::request_to_bytes(&request);
+    let data = library::utils::request_to_bytes(&request);
     let get_user: GetUserRequest = match serde_json::from_slice(&data) {
         Ok(user_data) => user_data,
         Err(_) => {
             return Response::json(&CreateUserResponse {
-                result: lib::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
+                result: library::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
             });
         }
     };
@@ -115,7 +115,7 @@ pub(crate) fn on_user_get(
             if rows.len() == 0 {
                 info!("User not found");
                 return Response::json(&CreateUserResponse {
-                    result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                    result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
                 });
             }
             if let Some(row) = rows.get(0) {
@@ -130,14 +130,14 @@ pub(crate) fn on_user_get(
                 return Response::json(&GetUserResponse { user });
             } else {
                 return Response::json(&CreateUserResponse {
-                    result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                    result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
                 });
             }
         }
         Err(err) => {
             log::error!("Error getting user: {}", err);
             Response::json(&CreateUserResponse {
-                result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
             })
         }
     }
@@ -147,12 +147,12 @@ pub(crate) fn on_user_auth(
     request: &Request,
     connection_pool: r2d2::Pool<PostgresConnectionManager<postgres::NoTls>>,
 ) -> Response {
-    let data = lib::utils::request_to_bytes(request);
+    let data = library::utils::request_to_bytes(request);
     let user_auth: UserAuthRequest = match serde_json::from_slice(&data) {
         Ok(user_data) => user_data,
         Err(_) => {
             return Response::json(&CreateUserResponse {
-                result: lib::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
+                result: library::enums::ERROR_RESPONSE_INVALID_JSON.to_string(),
             });
         }
     };
@@ -166,25 +166,25 @@ pub(crate) fn on_user_auth(
             if rows.len() == 0 {
                 info!("User not found");
                 return Response::json(&CreateUserResponse {
-                    result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                    result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
                 });
             }
             if let Some(row) = rows.get(0) {
-                let token = lib::utils::generate_token();
+                let token = library::utils::generate_token();
                 return Response::json(&UserAuthResponse {
                     token,
                     level: row.get(0),
                 });
             } else {
                 return Response::json(&CreateUserResponse {
-                    result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                    result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
                 });
             }
         }
         Err(err) => {
             log::error!("Error authenticating user: {}", err);
             Response::json(&CreateUserResponse {
-                result: lib::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
+                result: library::enums::ERROR_RESPONSE_DOESNT_EXISTS.to_string(),
             })
         }
     }
